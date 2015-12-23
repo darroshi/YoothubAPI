@@ -9,6 +9,6 @@ namespace YoothubAPI.Services
     {
         public string Title { get; set; }
 
-        public int Duration { get; set; }
+        public TimeSpan Duration { get; set; }
     }
 }

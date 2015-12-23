@@ -23,6 +23,6 @@ namespace YoothubAPI.Models
 
         public bool Broken { get; set; }
 
-        public int Duration { get; set; }
+        public TimeSpan Duration { get; set; }
     }
 }

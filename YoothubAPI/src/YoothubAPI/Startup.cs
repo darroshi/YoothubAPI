@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
+﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Authentication.Cookies;
 using YoothubAPI.Models;
 using Microsoft.AspNet.Identity.EntityFramework;
 using YoothubAPI.Services;
+using Serilog;
+using System.IO;
+using Microsoft.Data.Entity;
 
 namespace YoothubAPI
 {
@@ -35,7 +32,7 @@ namespace YoothubAPI
 
             // Add framework services.
             services.AddEntityFramework()
-                .AddSqlite()
+                .AddNpgsql()
                 .AddDbContext<ApplicationDbContext>();
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -57,15 +54,19 @@ namespace YoothubAPI
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            TextWriter writer = new StreamWriter(new FileStream("log.log", FileMode.OpenOrCreate));
+            loggerFactory.AddSerilog(new LoggerConfiguration()
+                .WriteTo.TextWriter(writer)
+                .MinimumLevel.Error()
+                .CreateLogger());
 
-            using (var db = new ApplicationDbContext())
+            using (ApplicationDbContext db = new ApplicationDbContext())
             {
+                db.Database.EnsureDeleted();
                 db.Database.EnsureCreated();
             }
 
-            app.UseStaticFiles();
-
-            app.UseIdentity();
+                app.UseIdentity();
 
             app.UseGoogleAuthentication(options =>
             {

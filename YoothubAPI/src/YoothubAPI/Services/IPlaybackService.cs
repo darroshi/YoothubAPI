@@ -4,6 +4,7 @@ namespace YoothubAPI.Services
 {
     public interface IPlaybackService
     {
-        Song CurrentSong { get; }
+        Song GetCurrentSong();
+        void Wish(Song s);
     }
 }

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Data.Entity;
-using Microsoft.Data.Sqlite;
 
 namespace YoothubAPI.Models
 {
@@ -25,11 +24,7 @@ namespace YoothubAPI.Models
         // This method connects the context with the database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionStringBuilder = new SqliteConnectionStringBuilder { DataSource = "database.db" };
-            var connectionString = connectionStringBuilder.ToString();
-            var connection = new SqliteConnection(connectionString);
-
-            optionsBuilder.UseSqlite(connection);
+            optionsBuilder.UseNpgsql(@"Host=127.0.0.1;Port=5432;Username=postgres;Password=abc123;Database = yoothub;");
         }
     }
 }

@@ -30,13 +30,6 @@ namespace YoothubAPI.Controllers.Account
             _logger = loggerFactory.CreateLogger<AccountController>();
         }
 
-        // GET: /Account/Test
-        [HttpGet]
-        public IActionResult Test()
-        {
-            return Json("TEST OK");
-        }
-
         // GET: /Account/GetExternalAuthenticationSchemes
         [HttpGet]
         [AllowAnonymous]
@@ -49,10 +42,10 @@ namespace YoothubAPI.Controllers.Account
         // POST: /Account/ExternalLogin
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult ExternalLogin([FromBody] string provider)
+        public IActionResult ExternalLogin([FromBody] string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Account");
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
         }
@@ -60,7 +53,7 @@ namespace YoothubAPI.Controllers.Account
         // GET: /Account/ExternalLoginCallback
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> ExternalLoginCallback()
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null)
         {
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
@@ -73,7 +66,7 @@ namespace YoothubAPI.Controllers.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
-                return new HttpStatusCodeResult(200);
+                return RedirectToLocal(returnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -92,7 +85,7 @@ namespace YoothubAPI.Controllers.Account
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation(6, "User created an account using {Name} provider.", info.LoginProvider);
-                        return new HttpStatusCodeResult(200);
+                        return RedirectToLocal(returnUrl);
                     }
                 }
             }
@@ -107,6 +100,18 @@ namespace YoothubAPI.Controllers.Account
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "User logged out.");
             return new HttpStatusCodeResult(200);
+        }
+
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            else
+            {
+                return new BadRequestResult();
+            }
         }
     }
 }

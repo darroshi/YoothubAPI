@@ -32,7 +32,7 @@ namespace YoothubAPI.Services
                 return new YoutubeInfo
                 {
                     Title = json.items[0].snippet.title,
-                    Duration = 15
+                    Duration = new TimeSpan(0, 0, 5)
                 };
             }
         }

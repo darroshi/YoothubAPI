@@ -5,7 +5,8 @@
   },
 
   "dependencies": {
-    "EntityFramework.Sqlite": "7.0.0-rc1-final",
+    "EntityFramework7.Npgsql": "3.1.0-rc1-3",
+    "EntityFramework.Commands": "7.0.0-rc1-final",
     "Microsoft.AspNet.Authentication.Google": "1.0.0-rc1-final",
     "Microsoft.AspNet.Identity": "3.0.0-rc1-final",
     "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-rc1-final",
@@ -18,17 +19,22 @@
     "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
+    "Serilog.Framework.Logging": "1.0.0-rc1-final-10071",
     "Swashbuckle": "6.0.0-rc1-final",
-    "QueryString.NET":  "1.0.0"
+    "QueryString.NET": "1.0.0",
+    "runtime.linux.System.Net.NetworkInformation": "4.1.0-beta-23516"
+
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Server.Kestrel"
+    "web": "Microsoft.AspNet.Server.Kestrel",
+    "ef": "EntityFramework.Commands"
   },
 
   "frameworks": {
     "dnxcore50": {
       "dependencies": {
+        "System.Net.Security": "4.0.0-beta-23516"
       }
     }
   },
