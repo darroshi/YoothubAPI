@@ -22,8 +22,8 @@
     "Serilog.Framework.Logging": "1.0.0-rc1-final-10071",
     "Swashbuckle": "6.0.0-rc1-final",
     "QueryString.NET": "1.0.0",
-    "runtime.linux.System.Net.NetworkInformation": "4.1.0-beta-23516"
-
+    "runtime.linux.System.Net.NetworkInformation": "4.1.0-beta-23516",
+    "Microsoft.AspNet.Diagnostics": "1.0.0-rc1-final"
   },
 
   "commands": {
@@ -32,11 +32,7 @@
   },
 
   "frameworks": {
-    "dnxcore50": {
-      "dependencies": {
-        "System.Net.Security": "4.0.0-beta-23516"
-      }
-    }
+    "dnx451": { }
   },
 
   "exclude": [

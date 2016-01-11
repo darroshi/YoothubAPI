@@ -19,7 +19,7 @@ namespace YoothubAPI.Models
 
         public DateTime Added { get; set; }
 
-        public ApplicationUser AddedBy { get; set; }
+        public string AddedById { get; set; }
 
         public bool Broken { get; set; }
 

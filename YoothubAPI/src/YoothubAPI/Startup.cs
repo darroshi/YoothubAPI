@@ -9,6 +9,10 @@ using YoothubAPI.Services;
 using Serilog;
 using System.IO;
 using Microsoft.Data.Entity;
+using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Diagnostics;
+using Microsoft.AspNet.Http.Features;
+using Microsoft.Extensions.WebEncoders;
 
 namespace YoothubAPI
 {
@@ -54,30 +58,51 @@ namespace YoothubAPI
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            TextWriter writer = new StreamWriter(new FileStream("log.log", FileMode.OpenOrCreate));
+            TextWriter writer = new StreamWriter(new FileStream("logs/log.log", FileMode.Append));
             loggerFactory.AddSerilog(new LoggerConfiguration()
                 .WriteTo.TextWriter(writer)
-                .MinimumLevel.Error()
+                .MinimumLevel.Verbose()
                 .CreateLogger());
+
+            app.UseExceptionHandler(errorApp => 
+            {
+                errorApp.Run(async context =>
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "text/html";
+                    await context.Response.WriteAsync("<html><body>\r\n");
+                    await context.Response.WriteAsync("We're sorry, we encountered an un-expected issue with your application.<br>\r\n");
+
+                    var error = context.Features.Get<IExceptionHandlerFeature>();
+                    if (error != null)
+                    {
+                        // This error would not normally be exposed to the client
+                        await context.Response.WriteAsync("<br>Error: " + HtmlEncoder.Default.HtmlEncode(error.Error.ToString() + " " + error.Error.Message) + "<br>\r\n");
+                    }
+                    await context.Response.WriteAsync("<br><a href=\"/\">Home</a><br>\r\n");
+                    await context.Response.WriteAsync("</body></html>\r\n");
+                    await context.Response.WriteAsync(new string(' ', 512)); // Padding for IE
+                });
+            });
 
             using (ApplicationDbContext db = new ApplicationDbContext())
             {
-                db.Database.EnsureDeleted();
                 db.Database.EnsureCreated();
             }
 
-                app.UseIdentity();
+            app.UseIdentity();
 
             app.UseGoogleAuthentication(options =>
             {
-                options.ClientId = "183555151952-kf6rvmkdtt9fq7kmnesq0tvgjv5dtjrc.apps.googleusercontent.com";
-                options.ClientSecret = "Nx9QgB0A6QuhetihuH-7qBTg";
+                options.ClientId = "183555151952-07kf9hqu1a2g7ihkifchqjotnh98ce9c.apps.googleusercontent.com";
+                options.ClientSecret = "3mYjlHirja6kj-QjJDC57SFf";
+                options.CallbackPath = new PathString("/api/signin-google");
             });
 
             app.UseMvc();
 
-            app.UseSwaggerGen();
-            app.UseSwaggerUi("api/docs");
+            app.UseSwaggerGen("api/swagger/{apiVersion}/swagger.json");
+            app.UseSwaggerUi("api/docs", "/api/swagger/v1/swagger.json");
 
         }
 

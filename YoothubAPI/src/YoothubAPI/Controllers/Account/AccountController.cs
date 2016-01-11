@@ -36,14 +36,20 @@ namespace YoothubAPI.Controllers.Account
         public IActionResult GetExternalAuthenticationSchemes()
         {
             var schemes = _signInManager.GetExternalAuthenticationSchemes().ToList();
+            foreach(var cookie in this.HttpContext.Request.Cookies)
+            {
+                _logger.LogWarning(cookie.Key);
+            }
             return Json(schemes);
         }
 
         // POST: /Account/ExternalLogin
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult ExternalLogin([FromBody] string provider, string returnUrl = null)
+        public IActionResult ExternalLogin([FromForm]string provider, [FromForm]string returnUrl = null)
         {
+            if (provider == null) return new BadRequestObjectResult("Bad input data format.");
+
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
@@ -85,7 +91,7 @@ namespace YoothubAPI.Controllers.Account
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation(6, "User created an account using {Name} provider.", info.LoginProvider);
-                        return RedirectToLocal(returnUrl);
+                        return Redirect(returnUrl); // TODO change to local redirect
                     }
                 }
             }
