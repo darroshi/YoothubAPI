@@ -72,7 +72,7 @@ namespace YoothubAPI.Controllers.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
-                return RedirectToLocal(returnUrl);
+                return new EmptyResult(); // Redirect(returnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -91,7 +91,7 @@ namespace YoothubAPI.Controllers.Account
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation(6, "User created an account using {Name} provider.", info.LoginProvider);
-                        return Redirect(returnUrl); // TODO change to local redirect
+                        return new EmptyResult(); // Redirect(returnUrl);
                     }
                 }
             }

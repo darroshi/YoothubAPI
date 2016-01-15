@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,10 +22,32 @@ namespace YoothubAPI.Models
 
         public DateTime Added { get; set; }
 
-        public string AddedById { get; set; }
+        [JsonIgnore]
+        public ApplicationUser AddedBy { get; set; }
+
+        [NotMapped]
+        public string AddedByName
+        {
+            get
+            {
+                return AddedBy?.UserName ?? string.Empty;
+            }
+        }
 
         public bool Broken { get; set; }
 
         public TimeSpan Duration { get; set; }
+
+        [JsonIgnore]
+        public List<SongTag> SongTags { get; set; }
+
+        [NotMapped]
+        public IEnumerable<string> Tags
+        {
+            get
+            {
+                return SongTags.Select(st => st.Tag.Name);
+            }
+        }
     }
 }

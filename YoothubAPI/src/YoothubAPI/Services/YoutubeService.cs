@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace YoothubAPI.Services
 {
@@ -28,11 +29,11 @@ namespace YoothubAPI.Services
             {
                 string result = await content.ReadAsStringAsync();
                 var json = JsonConvert.DeserializeObject<dynamic>(result);
-
+                var duration = json.items[0].contentDetails.duration.Value;
                 return new YoutubeInfo
                 {
                     Title = json.items[0].snippet.title,
-                    Duration = new TimeSpan(0, 0, 5)
+                    Duration = XmlConvert.ToTimeSpan(duration)
                 };
             }
         }

@@ -171,6 +171,26 @@ namespace YoothubAPI.Migrations
                     b.HasKey("Id");
                 });
 
+            modelBuilder.Entity("YoothubAPI.Models.SongTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("SongId");
+
+                    b.Property<string>("TagName")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+                });
+
+            modelBuilder.Entity("YoothubAPI.Models.Tag", b =>
+                {
+                    b.Property<string>("Name");
+
+                    b.HasKey("Name");
+                });
+
             modelBuilder.Entity("YoothubAPI.Models.Vote", b =>
                 {
                     b.Property<int>("Id")
@@ -215,6 +235,24 @@ namespace YoothubAPI.Migrations
                     b.HasOne("YoothubAPI.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("YoothubAPI.Models.Song", b =>
+                {
+                    b.HasOne("YoothubAPI.Models.ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("AddedById");
+                });
+
+            modelBuilder.Entity("YoothubAPI.Models.SongTag", b =>
+                {
+                    b.HasOne("YoothubAPI.Models.Song")
+                        .WithMany()
+                        .HasForeignKey("SongId");
+
+                    b.HasOne("YoothubAPI.Models.Tag")
+                        .WithMany()
+                        .HasForeignKey("TagName");
                 });
 
             modelBuilder.Entity("YoothubAPI.Models.Vote", b =>

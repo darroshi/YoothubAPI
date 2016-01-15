@@ -8,7 +8,7 @@ using YoothubAPI.Models;
 namespace YoothubAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20151222214706_Migration1")]
+    [Migration("20160115085159_Migration1")]
     partial class Migration1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

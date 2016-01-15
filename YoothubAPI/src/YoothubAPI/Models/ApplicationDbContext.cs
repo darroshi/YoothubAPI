@@ -13,6 +13,10 @@ namespace YoothubAPI.Models
 
         public DbSet<Vote> Votes { get; set; }
 
+        public DbSet<Tag> Tags { get; set; }
+
+        public DbSet<SongTag> SongTags { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

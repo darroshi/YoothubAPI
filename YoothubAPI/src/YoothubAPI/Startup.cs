@@ -13,6 +13,9 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Diagnostics;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.Extensions.WebEncoders;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Authentication.Cookies;
+using System.Threading.Tasks;
 
 namespace YoothubAPI
 {
@@ -32,7 +35,17 @@ namespace YoothubAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.Configure<IdentityOptions>(opt =>
+            {
+                opt.Cookies.ApplicationCookie.Events = new CookieAuthenticationEvents()
+                {
+                    OnRedirectToLogin = ctx =>
+                    {
+                        ctx.Response.StatusCode = 401;
+                        return Task.FromResult(0);
+                    }
+                };
+            });
 
             // Add framework services.
             services.AddEntityFramework()
