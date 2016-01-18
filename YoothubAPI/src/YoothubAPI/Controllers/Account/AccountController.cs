@@ -43,6 +43,14 @@ namespace YoothubAPI.Controllers.Account
             return Json(schemes);
         }
 
+        // GET: /Account/GetLoggedUserInfo
+        [HttpGet]
+        public async Task<IActionResult> GetLoggedUserInfo()
+        {
+            var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
+            return Json(currentUser);
+        }
+
         // POST: /Account/ExternalLogin
         [HttpPost]
         [AllowAnonymous]
@@ -72,7 +80,7 @@ namespace YoothubAPI.Controllers.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
-                return new EmptyResult(); // Redirect(returnUrl);
+                return Redirect(returnUrl);
             }
             if (result.IsLockedOut)
             {
@@ -91,7 +99,7 @@ namespace YoothubAPI.Controllers.Account
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation(6, "User created an account using {Name} provider.", info.LoginProvider);
-                        return new EmptyResult(); // Redirect(returnUrl);
+                        return Redirect(returnUrl);
                     }
                 }
             }
