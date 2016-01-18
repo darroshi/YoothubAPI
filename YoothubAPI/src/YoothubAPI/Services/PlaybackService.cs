@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Data.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,9 +16,13 @@ namespace YoothubAPI.Services
 
         public Song GetCurrentSong()
         {
-            var songs = db.Songs.OrderBy(s => s.LastPlayed);
+            var songs = db.Songs
+                .Include(s => s.AddedBy)
+                .Include(s => s.SongTags)
+                .ThenInclude(st => st.Tag)
+                .OrderBy(s => s.LastPlayed);
 
-            if(_currentSong == null || _currentSong.LastPlayed.Add(_currentSong.Duration) > DateTime.Now)
+            if(_currentSong == null || _currentSong.LastPlayed.Add(_currentSong.Duration) < DateTime.Now)
             {
                 _currentSong = _wishQueue.Any() ? _wishQueue.Dequeue() : songs.First();
                 _currentSong.LastPlayed = DateTime.Now;

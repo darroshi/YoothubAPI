@@ -122,6 +122,7 @@ namespace YoothubAPI.Controllers.Songs
         public async Task<IActionResult> Delete(int id)
         {
             var song = await this.Get(id);
+            if (song == null) return new BadRequestObjectResult("Song with given id doesn't exist.");
 
             if (song.AddedBy.Id != User.GetUserId())
                 return new HttpStatusCodeResult(403);
