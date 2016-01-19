@@ -14,6 +14,8 @@ namespace YoothubAPI.Models
 
         public string URL { get; set; }
 
+        public string SongId { get; set; }
+
         public string Title { get; set; }
 
         public int Votes { get; set; }
@@ -37,6 +39,15 @@ namespace YoothubAPI.Models
         public bool Broken { get; set; }
 
         public TimeSpan Duration { get; set; }
+
+        [NotMapped]
+        public int DurationInSeconds
+        {
+            get
+            {
+                return (int)Math.Ceiling(Duration.TotalSeconds);
+            }
+        }
 
         [JsonIgnore]
         public List<SongTag> SongTags { get; set; }

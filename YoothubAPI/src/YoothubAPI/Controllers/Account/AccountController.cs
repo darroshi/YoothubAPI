@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNet.Authorization;
+using Microsoft.AspNet.Http.Authentication;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.SwaggerGen.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +35,7 @@ namespace YoothubAPI.Controllers.Account
         // GET: /Account/GetExternalAuthenticationSchemes
         [HttpGet]
         [AllowAnonymous]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(List<AuthenticationDescription>))]
         public IActionResult GetExternalAuthenticationSchemes()
         {
             var schemes = _signInManager.GetExternalAuthenticationSchemes().ToList();
@@ -45,6 +48,7 @@ namespace YoothubAPI.Controllers.Account
 
         // GET: /Account/GetLoggedUserInfo
         [HttpGet]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(List<ApplicationUser>))]
         public async Task<IActionResult> GetLoggedUserInfo()
         {
             var currentUser = await _userManager.FindByIdAsync(User.GetUserId());

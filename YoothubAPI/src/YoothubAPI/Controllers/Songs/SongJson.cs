@@ -6,10 +6,10 @@ using YoothubAPI.Models;
 
 namespace YoothubAPI.Controllers.Songs
 {
-    public class SongsJson
+    public class SongJson
     {
-        public int Count { get; set; }
+        public Song Song { get; set; }
 
-        public IEnumerable<SongJson> Results { get; set; }
+        public VoteType? CurrentVote { get; set; }
     }
 }

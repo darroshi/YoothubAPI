@@ -12,6 +12,8 @@ using Microsoft.QueryStringDotNET;
 using Swashbuckle.SwaggerGen.Annotations;
 using System.Net;
 using Microsoft.Data.Entity;
+using Microsoft.Data.Entity.Internal;
+using Microsoft.Extensions.Logging;
 
 namespace YoothubAPI.Controllers.Songs
 {
@@ -22,50 +24,71 @@ namespace YoothubAPI.Controllers.Songs
 
         private readonly IYoutubeService _youtubeService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger _logger;
 
-        public SongsController(IYoutubeService youtubeService, UserManager<ApplicationUser> userManager)
+        public SongsController(IYoutubeService youtubeService, UserManager<ApplicationUser> userManager, ILoggerFactory loggerFactory)
         {
             _youtubeService = youtubeService;
             _userManager = userManager;
+            _logger = loggerFactory.CreateLogger<SongsController>();
         }
 
         // GET: api/songs?page=5&pageSize=20
         [HttpGet]
         [SwaggerResponse(HttpStatusCode.OK, Type = typeof(SongsJson))]
-        public IActionResult Get([FromQuery]int? page, [FromQuery]int? pageSize = 20)
+        public async Task<IActionResult> Get([FromQuery]int? page, [FromQuery]int? pageSize = 20)
         {
             if (page < 0 || pageSize < 0) return new BadRequestResult();
 
             var count = db.Songs.Count();
+            var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
+            var currentUserId = currentUser?.Id;
+
+            var songs = db.Songs
+                        .Include(s => s.AddedBy)
+                        .Include(s => s.SongTags)
+                        .ThenInclude(st => st.Tag);
+
+            var votes = db.Votes
+                .Include(v => v.User)
+                .Where(v => v.User.Id == currentUserId).ToList();
+
+            var result = songs.Select((s => new SongJson { Song = s, CurrentVote = (votes.Any(v => v.SongId == s.Id) ? (VoteType?)votes.FirstOrDefault(v => v.SongId == s.Id).VoteType : null) }));
 
             if (!page.HasValue)
                 return Json(new SongsJson
                 {
                     Count = count,
-                    Results = db.Songs
-                        .Include(s => s.AddedBy)
-                        .Include(s => s.SongTags)
-                        .ThenInclude(st => st.Tag)
+                    Results = result
                 });
 
             return Json(new SongsJson
             {
                 Count = count,
-                Results = db.Songs
-                    .Include(s => s.AddedBy)
-                    .Include(st => st.SongTags)
-                    .Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value)
+                Results = result
+                    .Skip(page.Value * pageSize.Value).Take(pageSize.Value)
             });
         }
 
         // GET api/songs/5
         [HttpGet("{id}")]
-        public async Task<Song> Get(int id)
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(SongJson))]
+        public async Task<IActionResult> Get(int id)
         {
-            return await db.Songs
-                .Include(s => s.AddedBy)
-                .Include(st => st.SongTags)
-                .FirstOrDefaultAsync(s => s.Id == id);
+            var song = await db.Songs
+                        .Include(s => s.AddedBy)
+                        .Include(s => s.SongTags)
+                        .ThenInclude(st => st.Tag)
+                        .FirstOrDefaultAsync(s => s.Id == id);
+
+            var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
+            var currentUserId = currentUser?.Id;
+
+            var vote = await db.Votes
+                .Include(v => v.User)
+                .FirstOrDefaultAsync(v => v.Id == id && v.User.Id == currentUserId);
+
+            return Json(new SongJson { Song = song, CurrentVote = vote != null ? (VoteType?)vote.VoteType : null } );
         }
 
         // POST api/songs
@@ -75,7 +98,8 @@ namespace YoothubAPI.Controllers.Songs
         {
             var query = new Uri(value.URL).Query.TrimStart('?');
 
-            var ytInfo = await _youtubeService.GetYoutubeInfo(QueryString.Parse(query)["v"]);
+            var ytId = QueryString.Parse(query)["v"];
+            var ytInfo = await _youtubeService.GetYoutubeInfo(ytId);
             var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
 
             var song = new Song
@@ -87,6 +111,7 @@ namespace YoothubAPI.Controllers.Songs
                 LastPlayed = DateTime.MinValue,
                 Title = ytInfo.Title,
                 URL = value.URL,
+                SongId = ytId,
                 Votes = 0
             };
 
@@ -121,7 +146,7 @@ namespace YoothubAPI.Controllers.Songs
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var song = await this.Get(id);
+            var song = await db.Songs.Include(s => s.AddedBy).FirstOrDefaultAsync(s => s.Id == id);
             if (song == null) return new BadRequestObjectResult("Song with given id doesn't exist.");
 
             if (song.AddedBy.Id != User.GetUserId())
@@ -136,7 +161,7 @@ namespace YoothubAPI.Controllers.Songs
         [Authorize]
         public async Task<IActionResult> Upvote(int id)
         {
-            var song = await this.Get(id);
+            var song = await db.Songs.FirstOrDefaultAsync(s => s.Id == id);
             if (song == null) return new BadRequestObjectResult("Song with given id doesn't exist.");
             var result = await VoteSong(song, VoteType.Upvote);
             return result;
@@ -146,7 +171,7 @@ namespace YoothubAPI.Controllers.Songs
         [Authorize]
         public async Task<IActionResult> Downvote(int id)
         {
-            var song = await this.Get(id);
+            var song = await db.Songs.FirstOrDefaultAsync(s => s.Id == id);
             if (song == null) return new BadRequestObjectResult("Song with given id doesn't exist.");
             var result = await VoteSong(song, VoteType.Downvote);
             return result;
