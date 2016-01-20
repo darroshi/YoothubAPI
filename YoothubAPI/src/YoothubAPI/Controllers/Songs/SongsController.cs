@@ -14,6 +14,7 @@ using System.Net;
 using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Internal;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace YoothubAPI.Controllers.Songs
 {
@@ -136,7 +137,16 @@ namespace YoothubAPI.Controllers.Songs
             }
 
             db.Add(song);
-            db.SaveChanges();
+            try
+            {
+                db.SaveChanges();
+            }
+            catch(DbUpdateException e)
+            {
+                if((e.InnerException as NpgsqlException)?.Code == "23505")
+                    return new ObjectResult("Song with given id already exists in database.") { StatusCode = 406 };
+            }
+
 
             return new EmptyResult();
         }
