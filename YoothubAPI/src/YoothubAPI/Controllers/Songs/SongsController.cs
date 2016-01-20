@@ -37,18 +37,18 @@ namespace YoothubAPI.Controllers.Songs
         // GET: api/songs?page=5&pageSize=20
         [HttpGet]
         [SwaggerResponse(HttpStatusCode.OK, Type = typeof(SongsJson))]
-        public async Task<IActionResult> Get([FromQuery]int? page, [FromQuery]int? pageSize = 20)
+        public async Task<IActionResult> Get([FromQuery]int? page, [FromQuery]int? pageSize = 20, [FromQuery]string query = "")
         {
             if (page < 0 || pageSize < 0) return new BadRequestResult();
 
-            var count = db.Songs.Count();
             var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
             var currentUserId = currentUser?.Id;
 
             var songs = db.Songs
                         .Include(s => s.AddedBy)
                         .Include(s => s.SongTags)
-                        .ThenInclude(st => st.Tag);
+                        .ThenInclude(st => st.Tag)
+                        .Where(s => s.Title.IndexOf(query, StringComparison.InvariantCultureIgnoreCase) > -1);
 
             var votes = db.Votes
                 .Include(v => v.User)
@@ -59,13 +59,13 @@ namespace YoothubAPI.Controllers.Songs
             if (!page.HasValue)
                 return Json(new SongsJson
                 {
-                    Count = count,
+                    Count = result.Count(),
                     Results = result
                 });
 
             return Json(new SongsJson
             {
-                Count = count,
+                Count = result.Count(),
                 Results = result
                     .Skip(page.Value * pageSize.Value).Take(pageSize.Value)
             });
