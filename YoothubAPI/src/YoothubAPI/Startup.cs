@@ -71,9 +71,8 @@ namespace YoothubAPI
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            TextWriter writer = new StreamWriter(new FileStream("logs/log.log", FileMode.Append));
             loggerFactory.AddSerilog(new LoggerConfiguration()
-                .WriteTo.TextWriter(writer)
+                .WriteTo.RollingFile("logs/log.log")
                 .MinimumLevel.Verbose()
                 .CreateLogger());
 

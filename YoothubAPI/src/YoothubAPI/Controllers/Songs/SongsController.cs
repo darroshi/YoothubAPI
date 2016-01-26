@@ -116,7 +116,7 @@ namespace YoothubAPI.Controllers.Songs
                 Votes = 0
             };
 
-            foreach(var tag in value.Tags)
+            foreach(var tag in value.Tags.Distinct())
             {
                 var dbTag = db.Tags.FirstOrDefault(t => t.Name == tag);
                 if(dbTag == null)

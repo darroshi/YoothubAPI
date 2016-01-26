@@ -25,8 +25,10 @@ namespace YoothubAPI.Services
             if(_currentSong == null || _currentSong.LastPlayed.Add(_currentSong.Duration) < DateTime.Now)
             {
                 _currentSong = _wishQueue.Any() ? _wishQueue.Dequeue() : songs.First();
+
                 _currentSong.LastPlayed = DateTime.Now;
-                db.Entry(_currentSong).Property(s => s.LastPlayed).IsModified = true;
+                _currentSong.TimesPlayed++;
+
                 db.SaveChanges();
             } 
 

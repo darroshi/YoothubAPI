@@ -48,7 +48,7 @@ namespace YoothubAPI.Controllers.Account
 
         // GET: /Account/GetLoggedUserInfo
         [HttpGet]
-        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(List<ApplicationUser>))]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(ApplicationUser))]
         public async Task<IActionResult> GetLoggedUserInfo()
         {
             var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
@@ -94,7 +94,8 @@ namespace YoothubAPI.Controllers.Account
             {
                 // If the user does not have an account, then ask the user to create an account.
                 var email = info.ExternalPrincipal.FindFirstValue(ClaimTypes.Email);
-                var user = new ApplicationUser { UserName = email, Email = email };
+                var displayName = $"{info.ExternalPrincipal.FindFirstValue(ClaimTypes.GivenName)} {info.ExternalPrincipal.FindFirstValue(ClaimTypes.Surname)}";
+                var user = new ApplicationUser { UserName = email, Email = email, DisplayName = displayName };
                 var resultUser = await _userManager.CreateAsync(user);
                 if (resultUser.Succeeded)
                 {

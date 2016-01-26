@@ -36,6 +36,8 @@ namespace YoothubAPI.Models
             }
         }
 
+        public int TimesPlayed { get; set; }
+
         public bool Broken { get; set; }
 
         public TimeSpan Duration { get; set; }
