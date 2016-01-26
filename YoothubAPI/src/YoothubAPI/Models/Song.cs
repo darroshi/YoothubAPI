@@ -32,7 +32,7 @@ namespace YoothubAPI.Models
         {
             get
             {
-                return AddedBy?.UserName ?? string.Empty;
+                return AddedBy?.DisplayName ?? string.Empty;
             }
         }
 
