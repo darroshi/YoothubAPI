@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace YoothubAPI.Validators {
+namespace YoothubAPI.Properties {
     using System;
     using System.Reflection;
     
@@ -38,7 +38,7 @@ namespace YoothubAPI.Validators {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("YoothubAPI.Validators.ErrorMessages", typeof(ErrorMessages).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("YoothubAPI.Properties.ErrorMessages", typeof(ErrorMessages).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -56,6 +56,15 @@ namespace YoothubAPI.Validators {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to Utwór o podanym ID istnieje już w bazie danych..
+        /// </summary>
+        internal static string DuplicateSongId {
+            get {
+                return ResourceManager.GetString("DuplicateSongId", resourceCulture);
             }
         }
         

@@ -146,7 +146,10 @@ namespace YoothubAPI.Controllers.Songs
             catch(DbUpdateException e)
             {
                 if((e.InnerException as NpgsqlException)?.Code == "23505")
-                    return new ObjectResult("Song with given id already exists in database.") { StatusCode = 406 };
+                {
+                    ModelState.AddModelError("URL", Properties.ErrorMessages.DuplicateSongId);
+                    return new BadRequestObjectResult(ModelState);
+                }
             }
 
 

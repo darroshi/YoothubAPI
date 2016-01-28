@@ -9,7 +9,7 @@ namespace YoothubAPI.Validators
 {
     public class YoutubeURL : ValidationAttribute
     {
-        public YoutubeURL() : base (ErrorMessages.YoutubeURLInvalid)
+        public YoutubeURL() : base (Properties.ErrorMessages.YoutubeURLInvalid)
         {
 
         }
