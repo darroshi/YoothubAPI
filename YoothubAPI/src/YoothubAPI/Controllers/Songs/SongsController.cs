@@ -97,6 +97,8 @@ namespace YoothubAPI.Controllers.Songs
         [Authorize]
         public async Task<IActionResult> Post([FromBody]AddSongJson value)
         {
+            if (!ModelState.IsValid) return new BadRequestObjectResult(ModelState);
+
             var query = new Uri(value.URL).Query.TrimStart('?');
 
             var ytId = QueryString.Parse(query)["v"];
