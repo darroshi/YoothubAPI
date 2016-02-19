@@ -36,13 +36,9 @@ namespace YoothubAPI.Controllers.Account
         [HttpGet]
         [AllowAnonymous]
         [SwaggerResponse(HttpStatusCode.OK, Type = typeof(List<AuthenticationDescription>))]
-        public IActionResult GetExternalAuthenticationSchemes()
+        public async Task<IActionResult> GetExternalAuthenticationSchemes()
         {
-            var schemes = _signInManager.GetExternalAuthenticationSchemes().ToList();
-            foreach(var cookie in this.HttpContext.Request.Cookies)
-            {
-                _logger.LogWarning(cookie.Key);
-            }
+            var schemes = await Task.Run(() => _signInManager.GetExternalAuthenticationSchemes().ToList());
             return Json(schemes);
         }
 

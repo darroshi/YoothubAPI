@@ -21,17 +21,17 @@ namespace YoothubAPI.Controllers.Songs
     [Route("api/[controller]")]
     public class SongsController : Controller
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
-
+        private readonly ApplicationDbContext _db;
         private readonly IYoutubeService _youtubeService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger _logger;
 
-        public SongsController(IYoutubeService youtubeService, UserManager<ApplicationUser> userManager, ILoggerFactory loggerFactory)
+        public SongsController(IYoutubeService youtubeService, UserManager<ApplicationUser> userManager, ILoggerFactory loggerFactory, ApplicationDbContext dbContext)
         {
             _youtubeService = youtubeService;
             _userManager = userManager;
             _logger = loggerFactory.CreateLogger<SongsController>();
+            _db = dbContext;
         }
 
         // GET: api/songs?page=5&pageSize=20
@@ -44,13 +44,13 @@ namespace YoothubAPI.Controllers.Songs
             var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
             var currentUserId = currentUser?.Id;
 
-            var songs = db.Songs
+            var songs = _db.Songs
                         .Include(s => s.AddedBy)
                         .Include(s => s.SongTags)
                         .ThenInclude(st => st.Tag)
                         .Where(s => s.Title.IndexOf(query, StringComparison.InvariantCultureIgnoreCase) > -1);
 
-            var votes = db.Votes
+            var votes = _db.Votes
                 .Include(v => v.User)
                 .Where(v => v.User.Id == currentUserId).ToList();
 
@@ -76,7 +76,7 @@ namespace YoothubAPI.Controllers.Songs
         [SwaggerResponse(HttpStatusCode.OK, Type = typeof(SongJson))]
         public async Task<IActionResult> Get(int id)
         {
-            var song = await db.Songs
+            var song = await _db.Songs
                         .Include(s => s.AddedBy)
                         .Include(s => s.SongTags)
                         .ThenInclude(st => st.Tag)
@@ -85,7 +85,7 @@ namespace YoothubAPI.Controllers.Songs
             var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
             var currentUserId = currentUser?.Id;
 
-            var vote = await db.Votes
+            var vote = await _db.Votes
                 .Include(v => v.User)
                 .FirstOrDefaultAsync(v => v.Id == id && v.User.Id == currentUserId);
 
@@ -120,17 +120,17 @@ namespace YoothubAPI.Controllers.Songs
 
             foreach(var tag in value.Tags.Distinct())
             {
-                var dbTag = db.Tags.FirstOrDefault(t => t.Name == tag);
+                var dbTag = _db.Tags.FirstOrDefault(t => t.Name == tag);
                 if(dbTag == null)
                 {
                     dbTag = new Tag
                     {
                         Name = tag
                     };
-                    db.Tags.Add(dbTag);
+                    _db.Tags.Add(dbTag);
                 }
 
-                db.SongTags.Add(
+                _db.SongTags.Add(
                     new SongTag()
                     {
                         Song = song,
@@ -138,10 +138,10 @@ namespace YoothubAPI.Controllers.Songs
                     });
             }
 
-            db.Add(song);
+            _db.Add(song);
             try
             {
-                db.SaveChanges();
+                _db.SaveChanges();
             }
             catch(DbUpdateException e)
             {
@@ -161,14 +161,14 @@ namespace YoothubAPI.Controllers.Songs
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var song = await db.Songs.Include(s => s.AddedBy).FirstOrDefaultAsync(s => s.Id == id);
+            var song = await _db.Songs.Include(s => s.AddedBy).FirstOrDefaultAsync(s => s.Id == id);
             if (song == null) return new BadRequestObjectResult("Song with given id doesn't exist.");
 
             if (song.AddedBy.Id != User.GetUserId())
                 return new HttpStatusCodeResult(403);
 
-            db.Remove(song);
-            db.SaveChanges();
+            _db.Remove(song);
+            _db.SaveChanges();
             return new EmptyResult();
         }
 
@@ -176,7 +176,7 @@ namespace YoothubAPI.Controllers.Songs
         [Authorize]
         public async Task<IActionResult> Upvote(int id)
         {
-            var song = await db.Songs.FirstOrDefaultAsync(s => s.Id == id);
+            var song = await _db.Songs.FirstOrDefaultAsync(s => s.Id == id);
             if (song == null) return new BadRequestObjectResult("Song with given id doesn't exist.");
             var result = await VoteSong(song, VoteType.Upvote);
             return result;
@@ -186,7 +186,7 @@ namespace YoothubAPI.Controllers.Songs
         [Authorize]
         public async Task<IActionResult> Downvote(int id)
         {
-            var song = await db.Songs.FirstOrDefaultAsync(s => s.Id == id);
+            var song = await _db.Songs.FirstOrDefaultAsync(s => s.Id == id);
             if (song == null) return new BadRequestObjectResult("Song with given id doesn't exist.");
             var result = await VoteSong(song, VoteType.Downvote);
             return result;
@@ -196,7 +196,7 @@ namespace YoothubAPI.Controllers.Songs
         {
             var currentUser = await _userManager.FindByIdAsync(User.GetUserId());
 
-            var vote = db.Votes.FirstOrDefault(v => v.Song.Id == song.Id && v.User.Id == currentUser.Id);
+            var vote = _db.Votes.FirstOrDefault(v => v.Song.Id == song.Id && v.User.Id == currentUser.Id);
             if(vote != null)
             {
                 if (vote.VoteType == voteType)
@@ -226,7 +226,7 @@ namespace YoothubAPI.Controllers.Songs
                     VoteType = voteType
                 };
 
-                db.Votes.Add(vote);
+                _db.Votes.Add(vote);
             }
 
             switch (voteType)
@@ -240,7 +240,7 @@ namespace YoothubAPI.Controllers.Songs
                     break;
             }
 
-            db.SaveChanges();
+            _db.SaveChanges();
             return new EmptyResult();
         }
     }

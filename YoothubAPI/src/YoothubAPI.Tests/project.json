@@ -1,0 +1,25 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "YoothubAPI.Tests Class Library",
+  "authors": [ "Marcin" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "commands": {
+    "test": "xunit.runner.dnx"
+  },
+
+  "dependencies": {
+    "xunit.runner.dnx": "2.1.0-*",
+    "xunit": "2.1.0-*",
+    "NSubstitute": "1.9.2",
+    "EntityFramework.InMemory": "7.0.0-rc1-final",
+    "YoothubAPI": {}
+  },
+
+  "frameworks": {
+    "dnx451": { }
+  }
+}
+

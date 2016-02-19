@@ -9,35 +9,38 @@ namespace YoothubAPI.Services
 {
     public class PlaybackService : IPlaybackService
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
-
-        public Song _currentSong;
-        public Queue<Song> _wishQueue = new Queue<Song>();
+        private int _currentSongId;
+        private Queue<int> _wishQueue = new Queue<int>();
 
         public Song GetCurrentSong()
         {
-            var songs = db.Songs
-                .Include(s => s.AddedBy)
-                .Include(s => s.SongTags)
-                .ThenInclude(st => st.Tag)
-                .OrderBy(s => s.LastPlayed);
-
-            if(_currentSong == null || _currentSong.LastPlayed.Add(_currentSong.Duration) < DateTime.Now)
+            using (var _db = new ApplicationDbContext())
             {
-                _currentSong = _wishQueue.Any() ? _wishQueue.Dequeue() : songs.First();
+                var songs = _db.Songs
+                    .Include(s => s.AddedBy)
+                    .Include(s => s.SongTags)
+                    .ThenInclude(st => st.Tag)
+                    .OrderBy(s => s.LastPlayed).ToList();
 
-                _currentSong.LastPlayed = DateTime.Now;
-                _currentSong.TimesPlayed++;
+                var currentSong = songs.FirstOrDefault(s => s.Id == _currentSongId);
+                if (currentSong == null || currentSong.LastPlayed.Add(currentSong.Duration) < DateTime.Now)
+                {
+                    _currentSongId = _wishQueue.Any() ? _wishQueue.Dequeue() : songs.First().Id;
+                    currentSong = songs.FirstOrDefault(s => s.Id == _currentSongId);
 
-                db.SaveChanges();
-            } 
+                    currentSong.LastPlayed = DateTime.Now;
+                    currentSong.TimesPlayed++;
 
-            return _currentSong;
+                    _db.SaveChanges();
+                }
+
+                return currentSong;
+            }    
         }
 
-        public void Wish(Song s)
+        public void Wish(int id)
         {
-            _wishQueue.Enqueue(s);
+            _wishQueue.Enqueue(id);
         }
     }
 }
