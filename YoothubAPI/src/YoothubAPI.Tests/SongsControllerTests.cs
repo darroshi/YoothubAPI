@@ -67,7 +67,6 @@ namespace YoothubAPI.Tests
         {
             using (var controller = new SongsController(_youtubeService, _userManager, _loggerFactory, _dbContext))
             {
-                throw new Exception();
                 controller.ActionContext = new ActionContext { HttpContext = _contextMock };
                 var result = await controller.Get(null, null);
                 Assert.IsType<JsonResult>(result);
