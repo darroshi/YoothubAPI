@@ -48,10 +48,18 @@ namespace YoothubAPI
                 };
             });
 
+            // build connection string
+            var dbHostName = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? Configuration["Database:Host"];
+            var dbPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? Configuration["Database:Port"];
+            var dbUsername = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? Configuration["Database:Username"];
+            var dbPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? Configuration["Database:Password"];
+            var dbDatabase = Environment.GetEnvironmentVariable("POSTGRES_DATABASE") ?? Configuration["Database:Database"];
+            var connectionString = GetConnectionString(dbHostName, dbPort, dbUsername, dbPassword, dbDatabase);
+
             // Add framework services.
             services.AddEntityFramework()
                 .AddNpgsql()
-                .AddDbContext<ApplicationDbContext>();
+                .AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -98,11 +106,6 @@ namespace YoothubAPI
                 });
             });
 
-            using (ApplicationDbContext db = new ApplicationDbContext())
-            {
-                db.Database.EnsureCreated();
-            }
-
             app.UseIdentity();
 
             app.UseGoogleAuthentication(options =>
@@ -117,6 +120,11 @@ namespace YoothubAPI
             app.UseSwaggerGen("api/swagger/{apiVersion}/swagger.json");
             app.UseSwaggerUi("api/docs", "/api/swagger/v1/swagger.json");
 
+        }
+
+        private string GetConnectionString(string host, string port, string username, string password, string database)
+        {
+            return $"Host={host};Port={port};Username={username};Password={password};Database = {database};";
         }
 
         // Entry point for the application.

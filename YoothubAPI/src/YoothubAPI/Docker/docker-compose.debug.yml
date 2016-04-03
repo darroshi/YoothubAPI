@@ -13,6 +13,12 @@ services:
     - "${HOST_PORT}:${YOOTHUBAPI_PORT}"
     volumes:
     - ..:/app
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: abc123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: yoothub
     depends_on:
     - db
   db:

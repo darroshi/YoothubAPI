@@ -9,6 +9,11 @@ namespace YoothubAPI.Models
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public ApplicationDbContext()
+        {
+            this.Database.EnsureCreated();
+        }
+
         public DbSet<Song> Songs { get; set; }
 
         public DbSet<Vote> Votes { get; set; }
@@ -19,17 +24,12 @@ namespace YoothubAPI.Models
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+
             base.OnModelCreating(builder);
 
             builder.Entity<Song>()
                 .HasIndex(s => s.SongId)
                 .IsUnique();
-        }
-
-        // This method connects the context with the database
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(@"Host=db;Port=5432;Username=postgres;Password=abc123;Database = yoothub;");
         }
     }
 }
