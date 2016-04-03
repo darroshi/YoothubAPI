@@ -8,17 +8,27 @@
     }
   },
   "profiles": {
+    "web": {
+      "commandName": "web",
+      "environmentVariables": {
+        "Hosting:Environment": "Development"
+      }
+    },
+    "Docker": {
+      "executablePath": "%WINDIR%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "commandLineArgs": "-ExecutionPolicy RemoteSigned .\\Docker\\DockerTask.ps1 -Run -Environment $(Configuration) -Machine '$(DockerMachineName)' -ProjectFolder ."
+    },
+    "Deploy": {
+      "executablePath": "%WINDIR%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "commandLineArgs": "-ExecutionPolicy RemoteSigned .\\Docker\\DockerTask.ps1 -Run -Environment $(Configuration) -Machine 'vps' -ProjectFolder ."
+    },
+    "Clean": {
+      "executablePath": "%WINDIR%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "commandLineArgs": "-ExecutionPolicy RemoteSigned .\\Docker\\DockerTask.ps1 -Clean -Environment $(Configuration) -Machine '$(DockerMachineName)' -ProjectFolder ."
+    },
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/values",
-      "environmentVariables": {
-        "Hosting:Environment": "Development"
-      },
-      "sdkVersion": "dnx-coreclr-win-x86.1.0.0-rc1-final"
-    },
-    "web": {
-      "commandName": "web",
       "environmentVariables": {
         "Hosting:Environment": "Development"
       }

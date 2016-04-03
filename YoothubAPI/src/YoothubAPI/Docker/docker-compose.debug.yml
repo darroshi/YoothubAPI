@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  yoothubapi:
+    image: mwazelinski/yoothubapi
+    build:
+      context: ..
+      dockerfile: Docker/Dockerfile.debug
+      args:
+      - CONTAINER_PORT=${YOOTHUBAPI_PORT}
+      - SERVER_URLS=http://*:${YOOTHUBAPI_PORT}
+    ports:
+    - "${HOST_PORT}:${YOOTHUBAPI_PORT}"
+    volumes:
+    - ..:/app
+    depends_on:
+    - db
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: abc123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: yoothub
+    ports:
+    - 5432:5432

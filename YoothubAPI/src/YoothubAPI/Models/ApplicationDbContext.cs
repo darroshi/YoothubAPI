@@ -29,7 +29,7 @@ namespace YoothubAPI.Models
         // This method connects the context with the database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(@"Host=127.0.0.1;Port=5432;Username=postgres;Password=abc123;Database = yoothub;");
+            optionsBuilder.UseNpgsql(@"Host=db;Port=5432;Username=postgres;Password=abc123;Database = yoothub;");
         }
     }
 }
