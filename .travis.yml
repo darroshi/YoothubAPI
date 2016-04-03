@@ -1,0 +1,30 @@
+sudo: true
+language: csharp
+solution: ./YoothubAPI/YoothubAPI.sln
+branches:
+  only:
+    - /^\d+.\d+.\d+/
+    - develop
+mono:
+  - latest
+services:
+  - docker
+install:
+  - sudo apt-get update
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y -q docker-engine=$DOCKER_ENGINE_VERSION
+  - curl -sSL https://raw.githubusercontent.com/aspnet/Home/dev/dnvminstall.sh | sh && source ~/.dnx/dnvm/dnvm.sh && dnvm upgrade
+
+script:
+  - cd YoothubAPI/src
+  - dnu restore ./YoothubAPI/project.json && dnu build ./YoothubAPI/project.json
+  - dnu restore ./YoothubAPI.Tests/project.json && dnu build ./YoothubAPI.Tests/project.json
+  - dnx -p ./YoothubAPI.Tests test
+
+after_success:
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker build -f ./YoothubAPI/Docker/Dockerfile.release -t $DOCKER_IMAGE_NAME ./YoothubAPI
+  - docker images
+  - if [ ! -z "$TRAVIS_TAG" ]; then docker tag $DOCKER_IMAGE_NAME:latest $DOCKER_IMAGE_NAME:$TRAVIS_TAG && docker push $DOCKER_IMAGE_NAME; fi
+
+notifications:
+  slack: krysztalowepulpety:hHLE5HwACe8xjFsSD2ramKt1
