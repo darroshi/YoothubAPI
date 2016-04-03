@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Mvc;
+using Microsoft.Data.Entity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -30,7 +31,7 @@ namespace YoothubAPI.Tests
 
             services.AddEntityFramework()
                 .AddInMemoryDatabase()
-                .AddDbContext<ApplicationDbContext>();
+                .AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase());
             services.AddInstance<ILoggerFactory>(new LoggerFactory())
                 .AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
