@@ -15,6 +15,7 @@ using Microsoft.Data.Entity;
 using Microsoft.Data.Entity.Internal;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using YoothubAPI.Resources;
 
 namespace YoothubAPI.Controllers.Songs
 {
@@ -26,7 +27,11 @@ namespace YoothubAPI.Controllers.Songs
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger _logger;
 
-        public SongsController(IYoutubeService youtubeService, UserManager<ApplicationUser> userManager, ILoggerFactory loggerFactory, ApplicationDbContext dbContext)
+        public SongsController(
+            IYoutubeService youtubeService, 
+            UserManager<ApplicationUser> userManager, 
+            ILoggerFactory loggerFactory, 
+            ApplicationDbContext dbContext)
         {
             _youtubeService = youtubeService;
             _userManager = userManager;
@@ -147,7 +152,7 @@ namespace YoothubAPI.Controllers.Songs
             {
                 if((e.InnerException as NpgsqlException)?.Code == "23505")
                 {
-                    ModelState.AddModelError("URL", Properties.ErrorMessages.DuplicateSongId);
+                    ModelState.AddModelError("URL", ErrorMessages.DuplicateSongId);
                     return new BadRequestObjectResult(ModelState);
                 }
             }

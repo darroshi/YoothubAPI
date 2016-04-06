@@ -4,12 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using YoothubAPI.Resources;
 
 namespace YoothubAPI.Validators
 {
     public class YoutubeURL : ValidationAttribute
     {
-        public YoutubeURL() : base (Properties.ErrorMessages.YoutubeURLInvalid)
+        public YoutubeURL() : base (ErrorMessages.YoutubeURLInvalid)
         {
 
         }

@@ -17,6 +17,9 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Authentication.Cookies;
 using System.Threading.Tasks;
 using System;
+using Microsoft.AspNet.Localization;
+using System.Globalization;
+using System.Collections.Generic;
 
 namespace YoothubAPI
 {
@@ -36,6 +39,8 @@ namespace YoothubAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+
             services.Configure<IdentityOptions>(opt =>
             {
                 opt.Cookies.ApplicationCookie.Events = new CookieAuthenticationEvents()
@@ -84,6 +89,9 @@ namespace YoothubAPI
                 .WriteTo.RollingFile("logs/log.log")
                 .MinimumLevel.Verbose()
                 .CreateLogger());
+
+            // Configure the localization options
+            app.UseRequestLocalization(new RequestCulture("pl-PL"));
 
             app.UseExceptionHandler(errorApp => 
             {
