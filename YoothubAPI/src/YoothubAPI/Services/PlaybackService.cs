@@ -11,11 +11,15 @@ namespace YoothubAPI.Services
     {
         private int _currentSongId;
         private Queue<int> _wishQueue = new Queue<int>();
+        private readonly ApplicationDbContext _db;
+
+        public PlaybackService(ApplicationDbContext db)
+        {
+            _db = db;
+        }
 
         public Song GetCurrentSong()
         {
-            using (var _db = new ApplicationDbContext())
-            {
                 var songs = _db.Songs
                     .Include(s => s.AddedBy)
                     .Include(s => s.SongTags)
@@ -35,7 +39,6 @@ namespace YoothubAPI.Services
                 }
 
                 return currentSong;
-            }    
         }
 
         public void Wish(int id)
